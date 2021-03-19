@@ -1,0 +1,9 @@
+server.name: kibana
+server.host: "0"
+server.basePath: /kibana
+server.rewriteBasePath: true
+#server.ssl.enabled: true
+elasticsearch.ssl.verificationMode: certificate
+elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/elasticsearch-ca.pem"]
+elasticsearch.hosts: [ "https://elasticsearch:9200" ]
+xpack.monitoring.ui.container.elasticsearch.enabled: true

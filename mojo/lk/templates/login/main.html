@@ -1,0 +1,155 @@
+<body id="page-top">
+<style>
+    .emailInvalid { border: 3px solid red; }
+</style>
+<div id="login-form-modal" class="modal fade" data-backdrop="static">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<div class="modal-header">
+                <button class="close close-loginform-nav" type="button"
+                        data-dismiss="modal"></button>
+				<ul class="nav nav-tabs">
+					<li @click="loginTab" v-bind:class="{ 'active': loginTabActive }">
+                        <a href="#">Войти</a></li>
+					<li @click="restoreTab" v-bind:class="{ 'active': restoreTabActive }">
+                        <a href="#">Востановить пароль</a></li>
+				</ul>
+			</div>
+
+
+            <!-- login form loginform-div-login-form -->
+			<div v-bind:class="[ { 'hidden': !loginTabActive }, 'modal-body' ]">
+				<form class="form-horizontal">
+
+					<div class="form-group">
+						<label for="login_username" class="col-sm-2 control-label">Email</label>
+						<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 ">
+                            <input class="form-control" name="login_username" type="email"
+                                   id="login_username" placeholder="Почта@" autofocus
+                                   v-model="email" v-bind:class="{ emailInvalid: invalidEmail }"  />
+						</div>
+					</div> <!-- style=" border: 3px solid red; " -->
+
+					<div class="form-group">
+						<label for="login_password" class="col-sm-2 control-label">Пароль</label>
+						<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                            <div class="input-group" >
+                                <input class="form-control" name="login_password" :type="passwordFieldType"
+                                       id="login_password" placeholder="Пароль"
+                                       v-model="password" />
+                                <div class="input-group-btn">
+                                    <button class="btn btn-default" type="button"
+                                            @click="showPassword" >
+                                        <i class="glyphicon glyphicon-eye-open"></i>
+                                    </button>
+                                </div>
+                            </div>		
+						</div>
+					</div>
+
+					<div class="form-group hidden">
+						<label for="reCaptchaLogin" class="col-sm-2 control-label"></label>
+						<div class="col-sm-10">
+							<div id="reCaptchaLogin"></div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div id="register-form-body-create-btn" class="col-sm-offset-2 col-sm-10">
+							<button class="btn btn-primary" type="button" id="login-form-btn"
+                                    v-on:click="vLogin" >
+								Войти
+							</button>
+						</div>                       
+					</div>
+
+				</form>
+			</div>
+            <!-- /login form doLoginVerifyCaptcha -->
+
+
+            <!-- restore form loginform-div-restore-form -->
+			<div v-bind:class="[ { 'hidden': !restoreTabActive }, 'modal-body' ]">
+				<form class="form-horizontal">
+
+					<div class="form-group">
+						<label for="restore_username" class="col-sm-2 control-label">Email</label>
+						<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+							<input class="form-control" name="restore_username" type="email"
+                                   id="restore_username" placeholder="Почта@"
+                                   onkeypress="return restoreInputClick(event , this.form)"
+                                   v-model="email" v-bind:class="{ emailInvalid: invalidEmail }" />
+						</div>
+					</div>
+
+					<div class="form-group hidden">
+						<label for="reCaptchaRestore" class="col-sm-2 control-label"></label>
+						<div class="col-sm-10">
+							<div id="reCaptchaRestore"></div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div id="register-form-body-create-btn" class="col-sm-offset-2 col-sm-10">
+							<button class="btn btn-primary" type="button" onclick="restorePasswordVerifyCaptcha(this.form)">
+								Выслать пароль
+							</button>
+						</div>
+					</div>
+
+				</form>
+			</div>
+            <!-- /restore form restorePasswordVerifyCaptcha -->
+
+            
+            <div class="modal-footer">
+                <strong id="wrong-credentials" class="pull-left hidden">
+                    <p class="text-danger"> Неправильный пароль </p>
+                </strong>
+                <a href="/" class="btn btn-default close-loginform-nav"
+                   type="button">Закрыть</a>
+            </div>
+
+		</div>
+
+	</div>
+</div>
+<!-- /modal -->
+
+<script><TMPL_VAR NAME=js_main></script>
+
+<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit&hl=ru"
+        async defer></script>
+
+<script type="text/javascript">
+    var onloadCallback=function(){
+            wIdreCaptchaLogin   = grecaptcha.render(
+                'reCaptchaLogin',
+                {
+                    'callback':doLogin,
+                    'sitekey':'<TMPL_VAR NAME=captcha_pubkey>',
+                    'size':'invisible'
+                }
+            );
+            wIdreCaptchaRestore = grecaptcha.render(
+                'reCaptchaRestore',
+                {
+                    'callback':restorePassword,
+                    'sitekey':'<TMPL_VAR NAME=captcha_pubkey>',
+                    'size':'invisible'
+                }
+            );
+    };
+</script>
+
+<script type="text/javascript">
+    window.onload=function(){
+        $("#loginform-div-restore-form").addClass('hidden');
+        $("#loginform-div-restore-form-success").addClass('hidden');
+        $("#loginform-div-restore-form-error").addClass('hidden');
+        $('#login-form-modal').modal('show');
+    };    
+</script>
+
+</body></html>

@@ -1,0 +1,144 @@
+<body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+
+        <div class="container-fluid">
+            <div class="row"> <!-- col-xs (<768px)  col-sm Планшеты (≥768px)  col-md Настольные (≥992px)  col-lg Настольные (≥1200px) -->
+                <div class="col-xs-12 hidden-sm hidden-md hidden-lg">
+                    <!-- menu mobile -->
+                    <div class="col-xs-3 hidden-sm hidden-md hidden-lg pull-left">
+                        <button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse"
+                                data-target="#left-menu-main-div" aria-expanded="false" aria-controls="navbar">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+                    <!-- menu mobile -->
+    
+                    <!-- menu small -->
+                    <div class="col-xs-9 hidden-sm hidden-md hidden-lg text-right">
+                        <div class=" form-group"  style="margin-top: 9px; margin-bottom: 0px; ">
+                            <div class="input-group input-group-btn">
+                                <button class="btn" aria-label="Help" data-placement="top" data-trigger="focus">
+                                    <TMPL_VAR NAME=email>
+                                </button>
+                                <a class="btn btn-info" href="/?action=logout">Выйти</a> 
+                            </div>
+                        </div>
+                    </div>
+                    <!-- menu small -->
+    
+                    <!-- MAIN MENU -->
+                    <div  class="col-xs-12 hidden-sm hidden-md hidden-lg pull-left navbar-collapse collapse"  id="left-menu-main-div" >
+                        <ul class="nav navbar-nav navbar-right hidden-sm hidden-md hidden-lg">
+                            <li class=""><a href="/">Orders<span style="font-size:16px;" class="pull-right hidden-xs showopacity glyphicon glyphicon-home"></span></a></li>
+                            <li class=""><a href="/goods">Goods<span style="font-size:16px;" class="pull-right hidden-xs showopacity glyphicon glyphicon-ruble"></span></a></li>
+                            <li class=""><a>Balance <span id="user-balans"><TMPL_VAR NAME=userbalans></a></li>
+                        </ul>
+                    </div>
+                    <!-- MAIN MENU -->
+                </div>
+    
+                <div class="hidden-xs col-sm-12 col-md-12 col-lg-12">
+                    <!-- Balance -->
+                    <div class=" hidden-xs col-sm-4 col-md-4 col-lg-2">
+                        <a class="navbar-brand whitecolor">Balance <span id="user-balans"><TMPL_VAR NAME=userbalans></span></a>
+                    </div>
+                    <!-- user menu large    -->
+                    <div class="hidden-xs col-sm-8 col-md-8 col-lg-10 text-right">
+                        <div class=" form-group" style="margin-top: 9px; margin-bottom: 0px;">
+                            <div class="input-group input-group-btn">
+                                <button class="btn btn-email-bg-color-white" aria-label="Help" data-placement="top" data-trigger="focus">
+                                    <TMPL_VAR NAME=email>
+                                </button>
+                                <a class="btn btn-info" href="/?action=logout">Выйти</a> 
+                            </div>
+                        </div> 
+                    </div>
+                    <!-- user menu large    -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- LEFT   col-md-2 -->
+            <div class="navbar-default sidebar col-sm-3 col-md-2 quad-monitors-right" role="navigation" style="margin-top:0px;">
+
+                <div class="sidebar-nav navbar-collapse  quad-monitors-left quad-monitors-right  navbar-collapse collapse">
+                    <ul class="nav" id="side-menu">					
+                        <li class=""><a href="/">Orders<span style="font-size:16px;" class="pull-right hidden-xs showopacity glyphicon glyphicon-home"></span></a></li>
+                        <li class=""><a href="/goods">Goods<span style="font-size:16px;" class="pull-right hidden-xs showopacity glyphicon glyphicon-ruble"></span></a></li>
+                    </ul>
+                </div>
+            </div>	
+            <!-- LEFT   col-md-2 -->
+
+            <div class=" col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <div class="alert alert-info">
+                    <H2><p> First </p></H2>
+                </div>
+
+                <!--  :key="item.name" -->
+                <div id="main">
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr><td>#</td><td>name</td><td>price</td><td>desc</td></tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in goods">
+                                <td> {{ item.id }}   </td>
+                                <td> {{ item.name }} </td>
+                                <td> {{ item.price }} </td>
+                                <td> {{ item.desc1 }} </td>
+                                <td>
+                                    <button v-on:click="Pay" :id="item.id"
+                                            type="button" class="btn btn-primary">
+                                        Add
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- -->
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr><td>#</td><td>name</td><td>price</td><td>count</td><td>visible</td></tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in orders">
+                                <td> {{ item.id }}   </td>
+                                <td> {{ item.name }} </td>
+                                <td> {{ item.price }} </td>
+                                <td> {{ item.count }} </td>
+                                <td> {{ item.visible }} </td>
+                                <td>
+                                    <button v-on:click="Increment" :id="item.id"
+                                            type="button" class="btn btn-primary">
+                                        Increment
+                                    </button>
+                                </td>
+                                <td>
+                                    <button v-on:click="Remove" :id="item.id"
+                                            type="button" class="btn btn-primary">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+<script><TMPL_VAR NAME=js_main></script>
+
+</body>
+</html>

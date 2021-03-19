@@ -1,0 +1,44 @@
+---
+secrets:
+  - 885322aafe10e32eb156ea14f329d71f65f6b7fb
+base_url: 'https://nginx.local'
+
+
+# nosql
+redis:
+  user: 'mojo'
+  password: 'mojo'
+  dbs:
+    - name: 'redis-1'
+      host: 'redis'
+      port: 6379
+
+memcached:
+  user: 'mojo'
+  password: 'mojo'
+  dbs:
+    - name: 'memcached-1'
+      host: 'memcached'
+      port: 11211
+
+# sql
+db:
+  type: 'postgresql'
+  users:
+    reconnect: 15
+    creds:
+      db_user: 'mojo'
+      db_pass: 'mojo'
+    rw: # keep 
+      - name: 'users-wr'
+        host: pgbouncer-users-ro
+        port: 5441
+        db_user: 'mojo'
+        db_pass: 'mojo'
+    ro:
+      - name: 'users-read'
+        reconnect: 9
+        host: pgbouncer-users-ro
+        port: 5441
+        db_user: 'mojo'
+        db_pass: 'g-mojo'

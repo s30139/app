@@ -1,0 +1,10 @@
+Make CA
+./create_root_cert_and_key.sh
+
+Make app certs
+!!! ONLY ON DEV : chmod 444 on private key
+cd certs/nginx
+../create_certificate_for_domain.sh nginx.local
+
+
+import rootCA.pem in chrome 'Authorities' tab

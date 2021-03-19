@@ -1,0 +1,7 @@
+cluster.name: "mojo"
+network.host: 0.0.0.0
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.verification_mode: certificate
+xpack.security.http.ssl.key: node.key
+xpack.security.http.ssl.certificate: node.crt
+xpack.security.http.ssl.certificate_authorities: [ "ca.crt" ]

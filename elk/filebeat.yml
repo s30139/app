@@ -1,0 +1,148 @@
+# make diferent output index
+fields: {logstype: "raw"}
+
+
+setup.ilm.enabled: false
+setup.template.name: "mojo"
+setup.template.pattern: "mojo*"
+
+filebeat:
+  registry.path: /usr/share/filebeat/data
+  config.modules.path: ${path.config}/modules.d/*.yml
+  overwrite_pipelines: true
+
+output:
+  elasticsearch:
+    protocol: https
+    hosts: ["https://elk:9200"]
+    ssl.certificate_authorities: ["certs/ca.pem"]
+    index: "mojo-%{[fields.logstype]}-%{+yyyy.MM.dd}"
+    pipelines:
+      - pipeline: "filebeat-7.9.1-nginx-access-pipeline"
+        when:
+          and:
+            - contains:
+                container.name: "nginx"
+            - contains:
+                stream: "stdout"
+      - pipeline: "filebeat-7.9.1-nginx-error-pipeline"
+        when:
+          and:
+            - contains:
+                container.name: "nginx"
+            - contains:
+                stream: "stderr"
+      - pipeline: "filebeat-7.9.1-redis-log-pipeline"
+        when:
+          and:
+            - contains:
+                container.name: "redis"
+            - contains:
+                stream: "stdout"
+      - pipeline: "filebeat-7.9.1-redis-slowlog-pipeline"
+        when:
+          and:
+            - contains:
+                container.name: "redis"
+            - contains:
+                stream: "stderr"
+
+#
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        # nginx
+        - condition:
+            contains:
+              docker.container.name: nginx
+          config:
+            - module: nginx
+              access:
+                enabled: true
+                containers:
+                    stream: "stdout"
+              error:
+                enabled: true
+                containers:
+                    stream: "stderr"
+            - type: container
+              paths:
+                - "/var/lib/docker/containers/${data.docker.container.id}/*.log"
+              processors:
+                - add_fields: # change index => fields: {logstype: "raw"} 
+                    target: fields
+                    fields:
+                      logstype: nginx
+        # mojo
+        - condition.contains:
+            container.name: mojo
+          config:
+            - type: container
+              scan_frequency: 3s
+              processors:
+                - decode_json_fields:
+                    fields: ["message"]
+                    target: "mojo"
+                    overwrite_keys: true
+                - if: # if message is json and has been parsed, remove orig 'message' field
+                    has_fields: mojo.level
+                  then:
+                    - drop_fields:
+                        fields: ["message"]
+                    - add_fields:
+                        target: fields
+                        fields:
+                          logstype: mojo
+              paths:
+                - "/var/lib/docker/containers/${data.docker.container.id}/*.log"
+
+        # postgres
+        - condition:
+            contains:
+              docker.container.name: postgresql-users-ro
+          config:
+            - type: container
+              scan_frequency: 3s
+              multiline.type: pattern
+              multiline.pattern: '^[0-9\-]'
+              multiline.negate: true
+              multiline.match: after
+              paths:
+                - "/var/lib/docker/containers/${data.docker.container.id}/*.log"
+              processors:
+                - decode_json_fields:
+                    fields: ["message"]
+                    target: "pg"
+                    overwrite_keys: true
+                - add_fields: # change index => fields: {logstype: "raw"}
+                    target: fields
+                    fields:
+                      logstype: pg
+                - if: # if message is json and has been parsed, remove orig 'message' field
+                    has_fields: pg.level
+                  then:
+                    - drop_fields:
+                        fields: ["message"]
+        # redis
+        - condition:
+            contains:
+              docker.container.name: redis
+          config:
+            - module: redis
+              log:
+                enabled: true
+                containers:
+                    stream: "stdout"
+              slowlog:
+                enabled: true
+                containers:
+                    stream: "stderr"
+            - type: container
+              paths:
+                - "/var/lib/docker/containers/${data.docker.container.id}/*.log"
+              processors:
+                - add_fields: # change index => fields: {logstype: "raw"}
+                    target: fields
+                    fields:
+                      logstype: redis
