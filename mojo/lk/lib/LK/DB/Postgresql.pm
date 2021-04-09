@@ -29,9 +29,16 @@ sub _connect {
     my $host = $p{host}   or $p_err++;
     my $port = $p{port}   or $p_err++;
     return { error => 'wrong params' } if $p_err;
-    
-    my $PG_OPTIONS = { AutoCommit=>1, RaiseError=>1, PrintError=>1, 'pg_utf8_strings' => 1 };
-    #my $PG_OPTIONS = { AutoCommit=>1, RaiseError=>1, PrintError=>1, 'pg_utf8_strings' => 1, Callbacks => $cb };
+
+    my $cb = {
+        #'connect_cached.connected' => sub {
+        connected => sub {
+            shift->do("SET TIME ZONE 'Europe/Moscow';");
+            return;
+        }
+    };
+    #my $PG_OPTIONS = { AutoCommit=>1, RaiseError=>1, PrintError=>1, 'pg_utf8_strings' => 1 };
+    my $PG_OPTIONS = { AutoCommit=>1, RaiseError=>1, PrintError=>1, 'pg_utf8_strings' => 1, Callbacks => $cb };
     my $utf8_flag = -1;
     my $en_utf8 = 0; # выключим установку флага pg_enable_utf8. в мане -1 это дефолтный и рекомендуемый
 
@@ -149,20 +156,23 @@ sub _connect_to_db {
     my $params = $p->{params};
     my $dbtype = $p->{dbtype};
 
-
+    my $now = time;
     my $key = (caller(1))[3] .'/'. $db .'/'. $dbtype;
+
+    # if connect broken ( db not availble or wrong login-password )
+    #    skip connect
+    if ( defined $self->{__config}->{$key}->{fail}
+        #  -----------------------------------------------------  past ----------------    now  -----  future
+        and (($self->{__config}->{$key}->{fail} + $self->{__config}->{$key}->{timeout}) < $now) )
+    {
+        # wait timeout on failed connect
+        return undef;
+    }
+
+
     # check that db is avail
     my $cache = $self->_connected( $self->{__config}->{$key} ) if $self->{__config}->{$key};
     return $cache->{dbh} if defined $cache->{dbh};
-
-    # if connect broken ( db not availble or wrong login-password )
-    #    skip connect 
-    if ( defined $self->{__config}->{$key}->{fail}
-        and (($self->{__config}->{$key}->{fail} + $self->{__config}->{$key}->{timeout}) > time) )
-    {
-        $self->error('skip connect because wait until timeout', $self->{__config}->{$key} );
-        return undef;
-    }
 
 
     # try connect to db
@@ -187,7 +197,7 @@ sub _connect_to_db {
     # save time when connect fail
     my $timeout = $params->{reconnect} // $config->{$db}->{reconnect};
     $self->{__config}->{$key}->{timeout} = $timeout;
-    $self->{__config}->{$key}->{fail} = time;
+    $self->{__config}->{$key}->{fail} = $now;
     $self->{__config}->{$key}->{dbh}  = undef;
 
     return undef;
@@ -207,7 +217,7 @@ sub _connected {
     }
 
     # last check->ping() .
-    $self->error('dbh avaiable', $h );
+    #$self->error('dbh avaiable', $h );
     return { dbh => $h->{dbh} };
 }
 
@@ -254,9 +264,9 @@ sub pg_main_read {
         return $dbh if $dbh;
     }
 
-    $self->warn("conect to all 'read' db <". $db ."> failed, try connect to 'write' db");
+    #$self->warn("conect to all 'read' db <". $db ."> failed, try connect to 'write' db") if int @{$dbs} ;
 
-    warn "FAIL ALL READ dbs";
+    #warn "FAIL ALL READ dbs"  if int @{$dbs} ;
 
     #
     my $dbh = $self->pg_main_write;
