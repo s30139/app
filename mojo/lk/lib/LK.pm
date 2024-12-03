@@ -31,8 +31,8 @@ sub startup {
         LK::Logger->new( self => $self );
 
         LK::DB::Postgresql->init({  config => $self->app->config('db')        });
-        LK::Cache::Redis->new({     config => $self->app->config('redis')     });
-        LK::Cache::Memcached->new({ config => $self->app->config('memcached') });
+        #LK::Cache::Redis->new({     config => $self->app->config('redis')     });
+        #LK::Cache::Memcached->new({ config => $self->app->config('memcached') });
 
     });
 

@@ -2,8 +2,14 @@ package LK::Cache;
 use Mojo::Base 'LK::Base';
 
 
-use LK::Cache::Redis;
-use LK::Cache::Memcached;
+#use LK::Cache::Redis;
+#use LK::Cache::Memcached;
+
+my $SELF = undef;
+sub load { return defined $SELF ? $SELF : $_[0]->new(); }
+
+sub get {}
+sub set {}
 
 
 sub warn {

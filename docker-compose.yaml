@@ -27,8 +27,8 @@ services:
     volumes:
       - ./mojo/:/mojo/
     command: >
-      bash -c "cpanm Redis Cache::Memcached::Fast
-      && morbo -v -w lk/lib/ -l http://*:83 ./lk/script/lk"
+      bash -c "morbo -v -w lk/lib/ -l http://*:83 ./lk/script/lk"
+    # cpanm Redis Cache::Memcached::Fast
     #entrypoint: ["/bin/sh", "-c", "while true; do sleep 30; done;"]
     #entrypoint: ["morbo", "-v", "-w", "lk/lib/", "-l", "http://*:83", "./lk/script/lk" ]
 
@@ -82,36 +82,40 @@ services:
   # elk
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+    image: elasticsearch:8.16.1
     environment:
       - discovery.type=single-node
+      - xpack.security.enabled=false
     networks:
       mojo:
         aliases:
           - elk # cert was build for 'elk' dns name
+          - elasticsearch
     volumes:
-      - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./certs/rootCA.pem:/usr/share/elasticsearch/config/ca.crt
-      - ./certs/elk/elk.crt:/usr/share/elasticsearch/config/node.crt
+      #- ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      #- ./certs/rootCA.pem:/usr/share/elasticsearch/config/ca.crt
+      #- ./certs/elk/elk.crt:/usr/share/elasticsearch/config/node.crt
       - ./certs/elk/elk.key:/usr/share/elasticsearch/config/node.key
       #            - name: elkdata
       #              mountPath: /usr/share/elasticsearch/data
 
   kibana:
     container_name: kibana
-    image: docker.elastic.co/kibana/kibana:7.2.0
+    image: kibana:8.16.1
+    ports:
+      - "5601:5601/tcp"
     environment:
       - ELASTICSEARCH_URL="https://elasticsearch:9200"
     networks:
       mojo:
     volumes:
-      - ./elk/kibana.yml:/usr/share/kibana/config/kibana.yml
+      #- ./elk/kibana.yml:/usr/share/kibana/config/kibana.yml
       - ./certs/rootCA.pem:/usr/share/kibana/config/elasticsearch-ca.pem
 
   filebeat:
     container_name: filebeat
     user: root
-    image: docker.elastic.co/beats/filebeat:7.9.1
+    image: elastic/filebeat:8.16.1
     networks:
       mojo:
     volumes:
@@ -121,6 +125,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     #entrypoint: ["/bin/sh", "-c", "while true; do sleep 30; done;"]
     entrypoint: ["filebeat", "-e", "--strict.perms=false" ]
+
+  # apache/kafka https://hub.docker.com/r/apache/kafka
+  kafka:
+    container_name: kafka
+    image: apache/kafka
+    networks:
+      - mojo
+    ports:
+      - "9092:9092/tcp"
+
 
 networks:
   mojo:

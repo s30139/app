@@ -33,8 +33,8 @@ sub db     { return LK::DB::Postgresql->load; }
 sub pg     { return LK::DB::Postgresql->load; }
 #sub mysql { return LK::DB::Mysql->load;      }
 
-sub redis    { return LK::Cache::Redis->load;     }
-sub memcache { return LK::Cache::Memcached->load; }
-
+#sub redis    { return LK::Cache::Redis->load;     }
+#sub memcache { return LK::Cache::Memcached->load; }
+sub  cache { return LK::Cache->load; }
 
 1;

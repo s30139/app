@@ -73,10 +73,10 @@ sub set_cache {
 
     my $cid = $self->auth_cookie;
 
-    my $c = $self->memcache->set('sess'. $cid, $sql, SESS_TTL );
+    my $c = $self->cache->set('sess'. $cid, $sql, SESS_TTL );
 
     #my $cache = $self->cache->set('sess'. $cid, $sql );
-    my $cache = $self->redis->set('sess'. $cid, $sql, SESS_TTL );
+    #my $cache = $self->redis->set('sess'. $cid, $sql, SESS_TTL );
 
 }
 
@@ -86,9 +86,9 @@ sub get_cache {
     #my $cid = $self->app->cookie('cid');
     my $cid = $self->auth_cookie;
 
-    my $memc = $self->memcache->get('sess'. $cid);
+    #my $memc = $self->memcache->get('sess'. $cid);
 
-    my $cache = $self->redis->get( 'sess'. $cid );
+    my $cache = $self->cache->get( 'sess'. $cid );
     #$self->dumper('$cache', $cache);
     return undef unless defined $cache && int(@{ $cache });
 
